@@ -78,6 +78,8 @@ export class AdminService {
    * Search and filter users with advanced options
    */
   static async searchUsers(filters: UserSearchFilters, page: number = 1, limit: number = 20) {
+    console.log('🔍 AdminService.searchUsers called with:', { filters, page, limit });
+    
     const skip = (page - 1) * limit;
     let query: any = {};
 
@@ -138,6 +140,8 @@ export class AdminService {
       query.isVerified = filters.isVerified;
     }
 
+    console.log('🔍 MongoDB query:', JSON.stringify(query, null, 2));
+
     const [users, total] = await Promise.all([
       User.find(query)
         .select('-password')
@@ -147,6 +151,8 @@ export class AdminService {
         .populate('subscription'),
       User.countDocuments(query)
     ]);
+
+    console.log('🔍 Query results:', { usersFound: users.length, total });
 
     return {
       users,

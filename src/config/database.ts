@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { createDefaultAdmin } from './createDefaultAdmin';
 
 const connectDB = async (): Promise<void> => {
   try {
@@ -24,6 +25,9 @@ const connectDB = async (): Promise<void> => {
     console.log(`🍃 MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database: ${conn.connection.name}`);
     console.log(`🌐 Connection Type: ${process.env.MONGODB_URI ? 'Atlas Cloud' : 'Local'}`);
+    
+    // Create default admin after successful connection
+    await createDefaultAdmin();
   } catch (error) {
     console.error('❌ Error connecting to MongoDB:', error);
     process.exit(1);

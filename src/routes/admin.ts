@@ -62,6 +62,205 @@ router.post('/login', [
   }
 });
 
+// Test endpoint to check users in database
+router.get('/test-users', adminAuth, async (req: AdminAuthRequest, res: express.Response) => {
+  try {
+    console.log('🔍 Testing users in database...');
+    
+    const totalUsers = await User.countDocuments();
+    console.log('🔍 Total users in database:', totalUsers);
+    
+    const sampleUsers = await User.find().select('email profile.firstName profile.lastName createdAt').limit(5);
+    console.log('🔍 Sample users:', sampleUsers);
+    
+    res.json({
+      totalUsers,
+      sampleUsers,
+      message: 'Database test completed'
+    });
+  } catch (error) {
+    console.error('❌ Test users error:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// Test endpoint to create sample users
+router.post('/create-test-users', adminAuth, async (req: AdminAuthRequest, res: express.Response) => {
+  try {
+    console.log('🔧 Creating test users via API...');
+    
+    // Check if users already exist
+    const existingUsers = await User.countDocuments();
+    if (existingUsers > 0) {
+      return res.json({ 
+        message: `${existingUsers} users already exist in database`,
+        totalUsers: existingUsers
+      });
+    }
+    
+    const testUsers = [
+      {
+        email: 'john.doe@example.com',
+        password: 'password123',
+        profile: {
+          firstName: 'John',
+          lastName: 'Doe',
+          age: 28,
+          gender: 'male',
+          interestedIn: 'female',
+          bio: 'I love hiking and coffee!',
+          photos: ['https://via.placeholder.com/300x400'],
+          location: {
+            city: 'New York',
+            state: 'NY',
+            country: 'USA',
+            coordinates: { lat: 40.7128, lng: -74.0060 }
+          },
+          interests: ['hiking', 'coffee', 'travel'],
+          education: 'Bachelor\'s Degree',
+          occupation: 'Software Engineer',
+          height: 180,
+          bodyType: 'athletic',
+          smoking: 'never',
+          drinking: 'sometimes',
+          religion: 'Not specified',
+          relationshipStatus: 'single',
+          relationshipGoals: 'long-term'
+        },
+        preferences: {
+          ageRange: { min: 25, max: 35 },
+          maxDistance: 50,
+          interestedIn: 'female'
+        },
+        activity: {
+          lastActive: new Date(),
+          isOnline: true
+        },
+        subscription: {
+          plan: 'free',
+          status: 'active',
+          startDate: new Date(),
+          autoRenew: false
+        },
+        isVerified: true,
+        isBanned: false
+      },
+      {
+        email: 'jane.smith@example.com',
+        password: 'password123',
+        profile: {
+          firstName: 'Jane',
+          lastName: 'Smith',
+          age: 26,
+          gender: 'female',
+          interestedIn: 'male',
+          bio: 'Passionate about art and music!',
+          photos: ['https://via.placeholder.com/300x400'],
+          location: {
+            city: 'Los Angeles',
+            state: 'CA',
+            country: 'USA',
+            coordinates: { lat: 34.0522, lng: -118.2437 }
+          },
+          interests: ['art', 'music', 'yoga'],
+          education: 'Master\'s Degree',
+          occupation: 'Graphic Designer',
+          height: 165,
+          bodyType: 'average',
+          smoking: 'never',
+          drinking: 'sometimes',
+          religion: 'Not specified',
+          relationshipStatus: 'single',
+          relationshipGoals: 'marriage'
+        },
+        preferences: {
+          ageRange: { min: 24, max: 32 },
+          maxDistance: 30,
+          interestedIn: 'male'
+        },
+        activity: {
+          lastActive: new Date(),
+          isOnline: false
+        },
+        subscription: {
+          plan: 'premium',
+          status: 'active',
+          startDate: new Date(),
+          autoRenew: true
+        },
+        isVerified: true,
+        isBanned: false
+      },
+      {
+        email: 'mike.wilson@example.com',
+        password: 'password123',
+        profile: {
+          firstName: 'Mike',
+          lastName: 'Wilson',
+          age: 30,
+          gender: 'male',
+          interestedIn: 'female',
+          bio: 'Fitness enthusiast and food lover!',
+          photos: ['https://via.placeholder.com/300x400'],
+          location: {
+            city: 'Chicago',
+            state: 'IL',
+            country: 'USA',
+            coordinates: { lat: 41.8781, lng: -87.6298 }
+          },
+          interests: ['fitness', 'cooking', 'movies'],
+          education: 'Bachelor\'s Degree',
+          occupation: 'Personal Trainer',
+          height: 185,
+          bodyType: 'athletic',
+          smoking: 'never',
+          drinking: 'sometimes',
+          religion: 'Not specified',
+          relationshipStatus: 'single',
+          relationshipGoals: 'serious'
+        },
+        preferences: {
+          ageRange: { min: 25, max: 35 },
+          maxDistance: 40,
+          interestedIn: 'female'
+        },
+        activity: {
+          lastActive: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+          isOnline: false
+        },
+        subscription: {
+          plan: 'vip',
+          status: 'active',
+          startDate: new Date(),
+          autoRenew: true
+        },
+        isVerified: true,
+        isBanned: false
+      }
+    ];
+    
+    const createdUsers = [];
+    for (const userData of testUsers) {
+      const user = new User(userData);
+      await user.save();
+      createdUsers.push(user.email);
+      console.log(`✅ Created user: ${userData.email}`);
+    }
+    
+    console.log('🎉 Test users created successfully!');
+    
+    res.json({ 
+      message: 'Test users created successfully!',
+      createdUsers,
+      totalUsers: await User.countDocuments()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error creating test users:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 // Get enhanced admin dashboard stats
 router.get('/dashboard', adminAuth, async (req: AdminAuthRequest, res: express.Response) => {
   try {
@@ -164,6 +363,8 @@ router.get('/users/search', adminAuth, [
   query('isVerified').optional().isBoolean()
 ], async (req: AdminAuthRequest, res: express.Response) => {
   try {
+    console.log('🔍 Admin user search request:', req.query);
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -190,10 +391,20 @@ router.get('/users/search', adminAuth, [
       };
     }
 
+    console.log('🔍 Filters applied:', filters);
+    
     const result = await AdminService.searchUsers(filters, page, limit);
+    
+    console.log('🔍 Search result:', {
+      usersCount: result.users.length,
+      total: result.pagination.total,
+      page: result.pagination.page,
+      pages: result.pagination.pages
+    });
+    
     res.json(result);
   } catch (error) {
-    console.error('User search error:', error);
+    console.error('❌ User search error:', error);
     res.status(500).json({ message: 'Server error.' });
   }
 });

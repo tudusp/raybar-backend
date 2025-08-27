@@ -267,11 +267,14 @@ const AdminPanel: React.FC = () => {
         ...searchFilters
       });
 
+      console.log('🔍 Fetching users with params:', params.toString());
       const response = await api.get(`/admin/users/search?${params}`);
+      console.log('🔍 Users response:', response.data);
+      
       setUsers(response.data.users);
       setPagination(response.data.pagination);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('❌ Error fetching users:', error);
       toast.error('Failed to load users');
     } finally {
       setLoading(false);

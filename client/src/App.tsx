@@ -163,8 +163,26 @@ const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children
   const adminToken = localStorage.getItem('adminToken');
   const adminInfo = localStorage.getItem('adminInfo');
   
+  // Check if admin tokens exist and are valid
   if (!adminToken || !adminInfo) {
-    return <Navigate to="/admin/login" />;
+    console.log('Admin tokens not found, redirecting to admin login');
+    return <Navigate to="/admin/login" replace />;
+  }
+  
+  try {
+    // Validate that adminInfo is valid JSON
+    const admin = JSON.parse(adminInfo);
+    if (!admin.id || !admin.email) {
+      console.log('Invalid admin info, redirecting to admin login');
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminInfo');
+      return <Navigate to="/admin/login" replace />;
+    }
+  } catch (error) {
+    console.log('Error parsing admin info, redirecting to admin login');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminInfo');
+    return <Navigate to="/admin/login" replace />;
   }
   
   return <>{children}</>;
@@ -178,6 +196,23 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
   
   return !user ? <>{children}</> : <Navigate to="/dashboard" />;
+};
+
+const AdminLoginRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const adminToken = localStorage.getItem('adminToken');
+  
+  // If user is logged in as regular user, redirect to dashboard
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // If admin is already logged in, redirect to admin panel
+  if (adminToken) {
+    return <Navigate to="/admin" replace />;
+  }
+  
+  return <>{children}</>;
 };
 
 function App() {
@@ -256,7 +291,11 @@ function App() {
                 </ProtectedRoute>
               } />
                               <Route path="/contact" element={<Contact />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/login" element={
+                  <AdminLoginRoute>
+                    <AdminLogin />
+                  </AdminLoginRoute>
+                } />
                 <Route path="/admin" element={
                   <AdminProtectedRoute>
                     <AdminPanel />

@@ -41,15 +41,31 @@ const AdminLogin: React.FC = () => {
     setLoading(true);
     setError('');
 
+    console.log('Attempting admin login with:', { email: formData.email });
+
     try {
       const response = await api.post('/admin/auth/login', formData);
+      
+      console.log('Admin login response:', response.data);
+      
+      // Clear any existing user tokens to prevent conflicts
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       
       // Store admin token and info
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminInfo', JSON.stringify(response.data.admin));
       
+      // Set admin token for API calls
+      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      
+      console.log('Admin tokens stored successfully');
+      console.log('Admin token:', response.data.token);
+      console.log('Admin info:', response.data.admin);
+      
       toast.success('Admin login successful!');
-      navigate('/admin');
+      console.log('Admin login successful, navigating to /admin');
+      navigate('/admin', { replace: true });
     } catch (error: any) {
       console.error('Admin login error:', error);
       setError(error.response?.data?.message || 'Login failed');
