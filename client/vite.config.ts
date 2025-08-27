@@ -9,4 +9,17 @@ export default defineConfig({
     port: 5173,
     strictPort: false, // Allow port fallback if 5173 is taken
   },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          mui: ['@mui/material', '@mui/icons-material'],
+        },
+      },
+    },
+  },
 })

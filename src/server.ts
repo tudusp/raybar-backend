@@ -213,41 +213,48 @@ setupSocketHandlers(io);
 // Error handling middleware
 app.use(errorHandler);
 
-const PORT = parseInt(process.env.PORT || '5000', 10);
+// For Vercel serverless deployment
+if (process.env.VERCEL) {
+  // Export the app for Vercel
+  module.exports = app;
+} else {
+  // Local development server
+  const PORT = parseInt(process.env.PORT || '5000', 10);
 
-// Simple port finding function
-const findAvailablePort = async (startPort: number): Promise<number> => {
-  const net = require('net');
-  
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
+  // Simple port finding function
+  const findAvailablePort = async (startPort: number): Promise<number> => {
+    const net = require('net');
     
-    server.listen(startPort, () => {
-      const port = server.address().port;
-      server.close(() => resolve(port));
+    return new Promise((resolve, reject) => {
+      const server = net.createServer();
+      
+      server.listen(startPort, () => {
+        const port = server.address().port;
+        server.close(() => resolve(port));
+      });
+      
+      server.on('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          resolve(findAvailablePort(startPort + 1));
+        } else {
+          reject(err);
+        }
+      });
     });
-    
-    server.on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE') {
-        resolve(findAvailablePort(startPort + 1));
-      } else {
-        reject(err);
-      }
-    });
-  });
-};
+  };
 
-// Start server with available port
-findAvailablePort(PORT).then((port) => {
-  server.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 Server running on port ${port}`);
-    console.log(`🌐 Network accessible at: http://0.0.0.0:${port}`);
-    console.log(`📱 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:5173"}`);
+  // Start server with available port
+  findAvailablePort(PORT).then((port) => {
+    server.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${port}`);
+      console.log(`🌐 Network accessible at: http://0.0.0.0:${port}`);
+      console.log(`📱 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:5173"}`);
+    });
+  }).catch((err) => {
+    console.error('❌ Failed to find available port:', err);
+    process.exit(1);
   });
-}).catch((err) => {
-  console.error('❌ Failed to find available port:', err);
-  process.exit(1);
-});
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
