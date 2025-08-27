@@ -1,0 +1,215 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import dotenv from 'dotenv';
+import path from 'path';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import connectDB from './config/database';
+import authRoutes from './routes/auth';
+import userRoutes from './routes/users';
+import matchRoutes from './routes/matches';
+import chatRoutes from './routes/chat';
+import searchRoutes from './routes/search';
+import adminRoutes from './routes/admin';
+import adminAuthRoutes from './routes/adminAuth';
+import subscriptionRoutes from './routes/subscriptions';
+import uploadRoutes from './routes/upload';
+import contactRoutes from './routes/contact';
+import { errorHandler } from './middleware/errorHandler';
+import { authenticate } from './middleware/auth';
+import { setupSocketHandlers } from './socket/socketHandlers';
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: true, // Allow all origins in development
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// Connect to MongoDB
+connectDB();
+
+// CORS middleware - apply first
+app.use(cors({
+  origin: function (origin, callback) {
+    console.log('CORS request from origin:', origin);
+    // Allow all origins in development
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  optionsSuccessStatus: 200,
+  preflightContinue: false
+}));
+
+// Rate limiting - more generous for chat applications
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const chatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 2000, // limit each IP to 2000 requests per windowMs for chat endpoints
+  message: 'Too many chat requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs for auth endpoints
+  message: 'Too many authentication requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Development rate limiter (more lenient)
+const devLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5000, // limit each IP to 5000 requests per windowMs for development
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Middleware
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: false // Disable CSP for development
+}));
+app.use(devLimiter); // Use development rate limiter for general requests
+
+// Additional CORS handling for preflight requests
+app.options('*', (req, res) => {
+  console.log('CORS preflight request from:', req.headers.origin);
+  console.log('CORS preflight method:', req.method);
+  console.log('CORS preflight headers:', req.headers);
+  
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+  // Routes with specific rate limiting
+  app.use('/api/auth', authLimiter, authRoutes);
+  app.use('/api/admin/auth', authLimiter, adminAuthRoutes);
+  app.use('/api/chat', chatLimiter, chatRoutes);
+  app.use('/api/users', userRoutes);
+  app.use('/api/matches', matchRoutes);
+  app.use('/api/search', searchRoutes);
+  app.use('/api/admin', adminRoutes);
+  app.use('/api/subscriptions', subscriptionRoutes);
+  app.use('/api/upload', authenticate, uploadRoutes);
+  app.use('/api/contact', contactRoutes);
+  
+  // Serve uploaded files with CORS headers
+  app.use('/uploads', (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    next();
+  }, express.static(path.join(__dirname, '../uploads')));
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  console.log('Health check request from:', req.headers.origin);
+  res.status(200).json({ message: 'Server is running!' });
+});
+
+// CORS test endpoint
+app.get('/api/cors-test', (req, res) => {
+  console.log('CORS test request from:', req.headers.origin);
+  res.status(200).json({ message: 'CORS is working!', origin: req.headers.origin });
+});
+
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
+}
+
+// Socket.IO setup
+setupSocketHandlers(io);
+
+// Error handling middleware
+app.use(errorHandler);
+
+const PORT = parseInt(process.env.PORT || '5000', 10);
+
+// Simple port finding function
+const findAvailablePort = async (startPort: number): Promise<number> => {
+  const net = require('net');
+  
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    
+    server.listen(startPort, () => {
+      const port = server.address().port;
+      server.close(() => resolve(port));
+    });
+    
+    server.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        resolve(findAvailablePort(startPort + 1));
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
+
+// Start server with available port
+findAvailablePort(PORT).then((port) => {
+  server.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${port}`);
+    console.log(`🌐 Network accessible at: http://0.0.0.0:${port}`);
+    console.log(`📱 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:5173"}`);
+  });
+}).catch((err) => {
+  console.error('❌ Failed to find available port:', err);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🛑 SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('🛑 SIGINT received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});

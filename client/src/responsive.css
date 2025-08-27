@@ -1,0 +1,216 @@
+/* Responsive Design Styles for MatchMaker App */
+
+/* Mobile First Approach */
+/* Base styles for mobile (up to 600px) */
+@media (max-width: 600px) {
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-padding {
+    padding: 16px !important;
+  }
+  
+  .mobile-margin {
+    margin: 8px !important;
+  }
+  
+  .mobile-text-center {
+    text-align: center !important;
+  }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-visible {
+    display: block !important;
+  }
+  
+  /* Swipe card optimizations for mobile */
+  .swipe-card-mobile {
+    height: 60vh !important;
+    max-height: 500px !important;
+  }
+  
+  /* Chat optimizations for mobile */
+  .chat-mobile {
+    height: calc(100vh - 64px) !important;
+  }
+  
+  .chat-input-mobile {
+    padding: 8px 12px !important;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  /* Button optimizations for mobile */
+  .mobile-button {
+    min-height: 44px !important; /* Touch target size */
+    padding: 12px 16px !important;
+  }
+  
+  /* Form optimizations for mobile */
+  .mobile-form-field {
+    margin-bottom: 16px !important;
+  }
+  
+  /* Navigation optimizations for mobile */
+  .mobile-nav-item {
+    padding: 12px 16px !important;
+    min-height: 48px !important;
+  }
+}
+
+/* Tablet styles (600px - 960px) */
+@media (min-width: 601px) and (max-width: 960px) {
+  .tablet-container {
+    max-width: 90% !important;
+    margin: 0 auto !important;
+  }
+  
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .tablet-padding {
+    padding: 24px !important;
+  }
+}
+
+/* Desktop styles (960px and above) */
+@media (min-width: 961px) {
+  .desktop-container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+  }
+  
+  .desktop-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  
+  .desktop-padding {
+    padding: 32px !important;
+  }
+}
+
+/* Large desktop styles (1200px and above) */
+@media (min-width: 1201px) {
+  .large-desktop-container {
+    max-width: 1400px !important;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 600px) and (orientation: landscape) {
+  .landscape-mobile {
+    height: 100vh !important;
+    overflow-y: auto !important;
+  }
+  
+  .landscape-swipe-card {
+    height: 50vh !important;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-support {
+    background-color: #121212 !important;
+    color: #ffffff !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .reduced-motion {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  
+  .print-visible {
+    display: block !important;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #ff4458;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d3002c;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .touch-optimized {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  .touch-button {
+    padding: 12px 20px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Focus styles for accessibility */
+.mobile-focus:focus {
+  outline: 2px solid #ff4458 !important;
+  outline-offset: 2px !important;
+}
+
+/* Loading states for mobile */
+.mobile-loading {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-height: 200px !important;
+}
+
+/* Error states for mobile */
+.mobile-error {
+  padding: 16px !important;
+  margin: 16px !important;
+  border-radius: 8px !important;
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+  text-align: center !important;
+}
+
+/* Success states for mobile */
+.mobile-success {
+  padding: 16px !important;
+  margin: 16px !important;
+  border-radius: 8px !important;
+  background-color: #e8f5e8 !important;
+  color: #2e7d32 !important;
+  text-align: center !important;
+}
