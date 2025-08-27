@@ -148,11 +148,34 @@ app.get('/api/cors-test', (req, res) => {
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
+  const frontendPath = path.join(__dirname, '../client/dist');
+  const indexPath = path.join(frontendPath, 'index.html');
   
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-  });
+  // Check if frontend build exists
+  const fs = require('fs');
+  if (fs.existsSync(indexPath)) {
+    app.use(express.static(frontendPath));
+    
+    app.get('*', (req, res) => {
+      res.sendFile(indexPath);
+    });
+  } else {
+    // If no frontend build, just serve API
+    app.get('/', (req, res) => {
+      res.json({ 
+        message: 'Matchmaking API Server', 
+        status: 'running',
+        endpoints: {
+          health: '/api/health',
+          auth: '/api/auth',
+          users: '/api/users',
+          matches: '/api/matches',
+          chat: '/api/chat',
+          admin: '/api/admin'
+        }
+      });
+    });
+  }
 }
 
 // Socket.IO setup

@@ -4,3 +4,12 @@ Username
 tudusp
 Password
 tpass4db
+
+# Add the fixed vercel.json
+git add vercel.json
+
+# Commit the fix
+git commit -m "Fix Vercel config: remove conflicting functions property"
+
+# Push to GitHub
+git push origin main
