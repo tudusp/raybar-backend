@@ -2,11 +2,11 @@ import axios from 'axios';
 
 // Configuration for different environments
 const API_CONFIG = {
-  // Replace this with your actual Vercel URL
+  // Your Vercel backend URL
   VERCEL_URL: 'https://raybar.vercel.app/api',
   LOCAL_URL: 'http://localhost:5000/api',
-  // Set this to false to use local backend while Vercel rebuilds
-  USE_VERCEL: false
+  // Automatically use Vercel in production, local in development
+  USE_VERCEL: process.env.NODE_ENV === 'production'
 };
 
 // Get the base URL dynamically
@@ -37,10 +37,18 @@ export const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Check for admin token first, then regular user token
+    const adminToken = localStorage.getItem('adminToken');
+    const userToken = localStorage.getItem('token');
+    
+    if (adminToken) {
+      config.headers.Authorization = `Bearer ${adminToken}`;
+      console.log('🔐 Using admin token for request:', config.url);
+    } else if (userToken) {
+      config.headers.Authorization = `Bearer ${userToken}`;
+      console.log('🔐 Using user token for request:', config.url);
     }
+    
     return config;
   },
   (error) => {
@@ -53,8 +61,18 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // Clear both admin and user tokens on 401
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminInfo');
+      
+      // Redirect based on current path
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith('/admin')) {
+        window.location.href = '/admin/login';
+      } else {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

@@ -242,6 +242,7 @@ const AdminPanel: React.FC = () => {
     api.defaults.headers.common['Authorization'] = `Bearer ${adminToken}`;
     
     fetchDashboardData();
+    fetchUsers(); // Add this line to load users when component mounts
   }, [navigate]);
 
   const fetchDashboardData = async () => {
@@ -261,20 +262,28 @@ const AdminPanel: React.FC = () => {
   const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
+      
+      // Filter out empty string values to avoid validation errors
+      const cleanFilters = Object.fromEntries(
+        Object.entries(searchFilters).filter(([_, value]) => value !== '')
+      );
+      
       const params = new URLSearchParams({
         page: page.toString(),
         limit: pagination.limit.toString(),
-        ...searchFilters
+        ...cleanFilters
       });
 
       console.log('🔍 Fetching users with params:', params.toString());
+      
       const response = await api.get(`/admin/users/search?${params}`);
       console.log('🔍 Users response:', response.data);
       
       setUsers(response.data.users);
       setPagination(response.data.pagination);
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error fetching users:', error);
+      console.error('❌ Error response:', error.response?.data);
       toast.error('Failed to load users');
     } finally {
       setLoading(false);

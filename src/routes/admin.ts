@@ -822,4 +822,27 @@ router.post('/users/bulk-action', adminAuth, [
   }
 });
 
+// Debug endpoint to check users directly
+router.get('/debug-users', adminAuth, async (req: AdminAuthRequest, res: express.Response) => {
+  try {
+    console.log('🔍 Debug: Checking users directly...');
+    
+    const totalUsers = await User.countDocuments();
+    const allUsers = await User.find().select('email profile.firstName profile.lastName createdAt').limit(10);
+    
+    console.log('🔍 Debug: Total users in DB:', totalUsers);
+    console.log('🔍 Debug: Sample users:', allUsers);
+    
+    res.json({
+      totalUsers,
+      sampleUsers: allUsers,
+      message: 'Debug users check'
+    });
+    
+  } catch (error) {
+    console.error('❌ Debug error:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 export default router;
