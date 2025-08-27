@@ -3,34 +3,39 @@ import { createDefaultAdmin } from './createDefaultAdmin';
 
 const connectDB = async (): Promise<void> => {
   try {
-    // Use MongoDB Atlas URI from environment variable, fallback to local MongoDB
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/matchmaking';
     
-    // MongoDB Atlas connection options
+    if (!process.env.MONGODB_URI) {
+      console.error('❌ MONGODB_URI environment variable is required');
+      throw new Error('MONGODB_URI not found in environment variables');
+    }
+    
     const options = {
       serverApi: {
         version: '1' as const,
         strict: true,
         deprecationErrors: true,
       },
-      // Additional options for better performance and reliability
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000, // Increased timeout for Vercel
       socketTimeoutMS: 45000,
       bufferCommands: false,
+      connectTimeoutMS: 10000, // Connection timeout
     };
-    
+
+    console.log('🔗 Connecting to MongoDB...');
     const conn = await mongoose.connect(mongoURI, options);
-    
+
     console.log(`🍃 MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database: ${conn.connection.name}`);
     console.log(`🌐 Connection Type: ${process.env.MONGODB_URI ? 'Atlas Cloud' : 'Local'}`);
-    
+
     // Create default admin after successful connection
     await createDefaultAdmin();
   } catch (error) {
     console.error('❌ Error connecting to MongoDB:', error);
-    process.exit(1);
+    console.error('🔧 Please check your MONGODB_URI in Vercel environment variables');
+    throw error; // Re-throw to let Vercel handle the error
   }
 };
 
