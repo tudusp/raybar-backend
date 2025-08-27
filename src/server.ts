@@ -51,7 +51,26 @@ connectDB();
 app.use(cors({
   origin: function (origin, callback) {
     console.log('CORS request from origin:', origin);
-    // Allow all origins in development
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost for development
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true);
+    }
+    
+    // Allow your Vercel frontend domain (if you deploy frontend to Vercel)
+    if (origin.includes('vercel.app') || origin.includes('netlify.app')) {
+      return callback(null, true);
+    }
+    
+    // Allow all origins in development and for Vercel
+    if (process.env.NODE_ENV !== 'production' || process.env.VERCEL) {
+      return callback(null, true);
+    }
+    
+    // In production, you can restrict to specific domains
     callback(null, true);
   },
   credentials: true,

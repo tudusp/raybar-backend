@@ -1,40 +1,31 @@
 import axios from 'axios';
 
-// Function to get the local IP address dynamically
-const getLocalIP = (): string => {
-  // For local development, always use localhost to avoid IP issues
-  return 'localhost';
-};
-
-// Function to get the backend port dynamically
-const getBackendPort = (): string => {
-  // If environment variable is set, use it
-  if (import.meta.env.VITE_API_PORT) {
-    return import.meta.env.VITE_API_PORT;
-  }
-  
-  // Default fallback - use 5000 to match server default
-  return '5000';
+// Configuration for different environments
+const API_CONFIG = {
+  // Replace this with your actual Vercel URL
+  VERCEL_URL: 'https://raybar.vercel.app/api',
+  LOCAL_URL: 'http://localhost:5000/api',
+  // Set this to true to use Vercel backend, false for local
+  USE_VERCEL: true
 };
 
 // Get the base URL dynamically
 const getBaseURL = (): string => {
-  // In production, use the same domain as the frontend
-  if (import.meta.env.PROD) {
-    return '/api';
+  // Check if we want to use Vercel backend
+  if (API_CONFIG.USE_VERCEL) {
+    console.log('🌐 Using Vercel backend:', API_CONFIG.VERCEL_URL);
+    return API_CONFIG.VERCEL_URL;
   }
   
-  // In development, use localhost or local IP
-  const host = getLocalIP();
-  const port = getBackendPort();
-  return `http://${host}:${port}/api`;
+  // Use local backend
+  console.log('🏠 Using local backend:', API_CONFIG.LOCAL_URL);
+  return API_CONFIG.LOCAL_URL;
 };
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || getBaseURL();
+const API_BASE_URL = getBaseURL();
 
 // Debug: Log the API base URL
-console.log('API Base URL:', API_BASE_URL);
-console.log('Environment VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('🚀 API Base URL:', API_BASE_URL);
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
