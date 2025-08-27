@@ -5,8 +5,8 @@ const API_CONFIG = {
   // Replace this with your actual Vercel URL
   VERCEL_URL: 'https://raybar.vercel.app/api',
   LOCAL_URL: 'http://localhost:5000/api',
-  // Set this to true to use Vercel backend, false for local
-  USE_VERCEL: true
+  // Set this to false to use local backend while Vercel rebuilds
+  USE_VERCEL: false
 };
 
 // Get the base URL dynamically
