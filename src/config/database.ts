@@ -17,10 +17,10 @@ const connectDB = async (): Promise<void> => {
         deprecationErrors: true,
       },
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 10000, // Increased timeout for Vercel
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
-      bufferCommands: false,
-      connectTimeoutMS: 10000, // Connection timeout
+      bufferCommands: true, // Enable buffer commands for serverless
+      connectTimeoutMS: 10000,
     };
 
     console.log('🔗 Connecting to MongoDB...');
@@ -35,7 +35,7 @@ const connectDB = async (): Promise<void> => {
   } catch (error) {
     console.error('❌ Error connecting to MongoDB:', error);
     console.error('🔧 Please check your MONGODB_URI in Vercel environment variables');
-    throw error; // Re-throw to let Vercel handle the error
+    throw error;
   }
 };
 

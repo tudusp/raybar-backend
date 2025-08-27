@@ -45,7 +45,14 @@ const io = new Server(server, {
 });
 
 // Connect to MongoDB
-connectDB();
+let dbConnected = false;
+connectDB().then(() => {
+  console.log('✅ Database connected successfully');
+  dbConnected = true;
+}).catch((error) => {
+  console.error('❌ Database connection failed:', error);
+  dbConnected = false;
+});
 
 // CORS middleware - apply first
 app.use(cors({
@@ -214,11 +221,10 @@ setupSocketHandlers(io);
 app.use(errorHandler);
 
 // For Vercel serverless deployment
-if (process.env.VERCEL) {
-  // Export the app for Vercel
-  module.exports = app;
-} else {
-  // Local development server
+export default app;
+
+// Local development server (only run if not on Vercel)
+if (!process.env.VERCEL) {
   const PORT = parseInt(process.env.PORT || '5000', 10);
 
   // Simple port finding function
