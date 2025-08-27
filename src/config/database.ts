@@ -7,6 +7,10 @@ const connectDB = async (): Promise<void> => {
     
     if (!process.env.MONGODB_URI) {
       console.error('❌ MONGODB_URI environment variable is required');
+      if (process.env.VERCEL) {
+        console.error('⚠️ Running in Vercel without MONGODB_URI - some features may not work');
+        return;
+      }
       throw new Error('MONGODB_URI not found in environment variables');
     }
     

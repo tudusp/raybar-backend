@@ -31,7 +31,10 @@ const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 if (missingEnvVars.length > 0) {
   console.error('❌ Missing required environment variables:', missingEnvVars);
   console.error('Please set these variables in your Vercel dashboard');
-  process.exit(1);
+  // Don't exit in serverless environment, just log the error
+  if (!process.env.VERCEL) {
+    process.exit(1);
+  }
 }
 
 const app = express();
@@ -177,7 +180,13 @@ app.use(express.urlencoded({ extended: true }));
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   console.log('Health check request from:', req.headers.origin);
-  res.status(200).json({ message: 'Server is running!' });
+  res.status(200).json({ 
+    message: 'Server is running!', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    vercel: !!process.env.VERCEL,
+    database: dbConnected ? 'connected' : 'disconnected'
+  });
 });
 
 // CORS test endpoint
