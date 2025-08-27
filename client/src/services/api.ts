@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // Configuration for different environments
 const API_CONFIG = {
-  // Your Vercel backend URL (updated to the working one)
-  VERCEL_URL: 'https://raybar-budi.vercel.app/api',
+  // Your Vercel backend URL (updated to the new deployment)
+  VERCEL_URL: 'https://raybar-git-main-s-p-tudus-projects.vercel.app/api',
   LOCAL_URL: 'http://localhost:5000/api',
   // Automatically use Vercel in production, local in development
   USE_VERCEL: process.env.NODE_ENV === 'production'

@@ -67,8 +67,12 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // Allow your Vercel frontend domain (if you deploy frontend to Vercel)
-    if (origin.includes('vercel.app') || origin.includes('netlify.app')) {
+    // Allow your Vercel frontend domains
+    if (origin.includes('raybar.vercel.app') || 
+        origin.includes('raybar-budi.vercel.app') ||
+        origin.includes('raybar-git-main-s-p-tudus-projects.vercel.app') ||
+        origin.includes('vercel.app') || 
+        origin.includes('netlify.app')) {
       return callback(null, true);
     }
     
