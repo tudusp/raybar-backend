@@ -36,7 +36,6 @@ const connectDB = async (): Promise<void> => {
       serverSelectionTimeoutMS: 10000, // Normal timeout for Render
       socketTimeoutMS: 45000, // Normal timeout for Render
       bufferCommands: true, // Enable buffering for Render
-      bufferMaxEntries: 0,
       connectTimeoutMS: 10000, // Normal timeout for Render
       retryWrites: true, // Enable retry writes for Render
       w: 'majority' as const,
