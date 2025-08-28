@@ -185,7 +185,7 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV,
     vercel: !!process.env.VERCEL,
     database: isConnected ? 'connected' : 'disconnected',
-    version: '3.0.1',
+    version: '3.0.2',
     buildTime: new Date().toISOString()
   });
 });
