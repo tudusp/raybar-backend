@@ -171,12 +171,13 @@ app.use(express.urlencoded({ extended: true }));
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   console.log('Health check request from:', req.headers.origin);
-  res.status(200).json({ 
-    message: 'Server is running!', 
+  const isConnected = mongoose.connection.readyState === 1;
+  res.status(200).json({
+    message: 'Server is running!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
     vercel: !!process.env.VERCEL,
-    database: dbConnected ? 'connected' : 'disconnected',
+    database: isConnected ? 'connected' : 'disconnected',
     version: '3.0.1',
     buildTime: new Date().toISOString()
   });
