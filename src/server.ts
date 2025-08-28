@@ -50,6 +50,10 @@ const io = new Server(server, {
 
 // Connect to MongoDB
 let dbConnected = false;
+console.log('🔍 Starting database connection...');
+console.log('🔍 MONGODB_URI exists:', !!process.env.MONGODB_URI);
+console.log('🔍 VERCEL environment:', !!process.env.VERCEL);
+
 connectDB().then(() => {
   console.log('✅ Database connected successfully');
   dbConnected = true;
