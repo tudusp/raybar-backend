@@ -317,6 +317,33 @@ app.get('/api/mongo-test', async (req, res) => {
   }
 });
 
+// Model test endpoint
+app.get('/api/model-test', async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const Admin = require('./models/Admin');
+    
+    // Test User model
+    const userCount = await User.countDocuments();
+    
+    // Test Admin model
+    const adminCount = await Admin.countDocuments();
+    
+    res.status(200).json({ 
+      message: 'Models working correctly',
+      userCount: userCount,
+      adminCount: adminCount,
+      modelsLoaded: true
+    });
+  } catch (error) {
+    console.error('Model test error:', error);
+    res.status(500).json({ 
+      message: 'Model test failed',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // CORS test endpoint
 app.get('/api/cors-test', (req, res) => {
   console.log('CORS test request from:', req.headers.origin);
