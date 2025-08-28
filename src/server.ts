@@ -78,6 +78,12 @@ mongoose.connection.on('disconnected', () => {
   dbConnected = false;
 });
 
+// Check if already connected
+if (mongoose.connection.readyState === 1) {
+  console.log('✅ MongoDB already connected');
+  dbConnected = true;
+}
+
 // CORS middleware - apply first
 app.use(cors({
   origin: function (origin, callback) {
