@@ -169,10 +169,10 @@ const AdminLogin: React.FC = () => {
               Default Admin Credentials:
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-              Email: admin@matchmaker.com
+              Email: Provide Proper Email ID
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-              Password: admin123456
+              Password: Provide Proper Password
             </Typography>
           </Box>
         </Paper>
