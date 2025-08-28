@@ -270,21 +270,27 @@ app.get('/api/mongo-test', async (req, res) => {
       });
     }
     
+    console.log('🔍 Testing MongoDB connection...');
+    console.log('🔍 URI length:', mongoURI.length);
+    
     // Try to connect directly
     const conn = await mongoose.createConnection(mongoURI, {
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
     });
     
-    // Test the connection
-    await conn.db.admin().ping();
+    console.log('🔍 Connection created, testing ping...');
+    
+    // Test the connection with a simple operation
+    const result = await conn.db.listCollections().toArray();
     
     res.status(200).json({ 
       message: 'MongoDB connection successful',
       hasUri: true,
       connected: true,
       host: conn.host,
-      name: conn.name
+      name: conn.name,
+      collections: result.length
     });
     
     // Close the test connection
