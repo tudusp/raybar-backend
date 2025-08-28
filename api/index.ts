@@ -44,6 +44,20 @@ app.get('/api/test', (req, res) => {
   });
 });
 
+// Debug endpoint to show all available routes
+app.get('/api/debug', (req, res) => {
+  res.status(200).json({ 
+    message: 'Debug endpoint',
+    availableEndpoints: [
+      '/api/health',
+      '/api/cors-test', 
+      '/api/test',
+      '/api/debug'
+    ],
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Vercel serverless function handler
 export default function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
