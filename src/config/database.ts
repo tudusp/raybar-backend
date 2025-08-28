@@ -23,19 +23,15 @@ const connectDB = async (): Promise<void> => {
         strict: true,
         deprecationErrors: true,
       },
-      maxPoolSize: 1, // Reduced for serverless
-      serverSelectionTimeoutMS: 5000, // Reduced timeout
-      socketTimeoutMS: 10000, // Reduced timeout
-      bufferCommands: false, // Disable buffer commands for serverless
-      connectTimeoutMS: 5000, // Reduced timeout
+      maxPoolSize: 1,
+      minPoolSize: 0,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 10000,
+      bufferCommands: false,
+      bufferMaxEntries: 0,
+      connectTimeoutMS: 5000,
       retryWrites: true,
       w: 'majority' as const,
-      // Remove these for serverless compatibility
-      // keepAlive: true,
-      // keepAliveInitialDelay: 300000,
-      // autoReconnect: true,
-      // reconnectTries: Number.MAX_VALUE,
-      // reconnectInterval: 1000,
     };
 
     console.log('🔗 Connecting to MongoDB with options:', JSON.stringify(options, null, 2));
