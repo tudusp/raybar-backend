@@ -219,6 +219,23 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
+// Cloudinary test endpoint
+app.get('/api/cloudinary-test', (req, res) => {
+  const cloudinaryConfig = {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Not Set',
+    api_key: process.env.CLOUDINARY_API_KEY ? 'Set' : 'Not Set',
+    api_secret: process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Not Set'
+  };
+  
+  res.status(200).json({ 
+    message: 'Cloudinary configuration check',
+    config: cloudinaryConfig,
+    allSet: cloudinaryConfig.cloud_name === 'Set' && 
+            cloudinaryConfig.api_key === 'Set' && 
+            cloudinaryConfig.api_secret === 'Set'
+  });
+});
+
 // CORS test endpoint
 app.get('/api/cors-test', (req, res) => {
   console.log('CORS test request from:', req.headers.origin);

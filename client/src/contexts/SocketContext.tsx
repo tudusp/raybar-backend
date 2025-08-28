@@ -35,7 +35,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   useEffect(() => {
     if (token && user) {
       // Get the socket URL from environment variable
-      const getSocketURL = (): string => {
+      const getSocketURL = (): string | null => {
+        // Check if we're on Vercel - disable Socket.IO for serverless
+        if (window.location.hostname.includes('vercel.app')) {
+          console.log('⚠️ Socket.IO disabled on Vercel - using polling fallback');
+          return null;
+        }
+        
         const envURL = import.meta.env.VITE_API_URL?.replace('/api', '');
         if (envURL) return envURL;
         
@@ -56,6 +62,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       };
 
       const socketURL = getSocketURL();
+      
+      // Don't connect if URL is null (Vercel environment)
+      if (!socketURL) {
+        console.log('🔌 Socket.IO disabled on Vercel serverless');
+        return;
+      }
+      
       console.log('🔌 Connecting to WebSocket at:', socketURL);
       
       const socketInstance = io(socketURL, {
