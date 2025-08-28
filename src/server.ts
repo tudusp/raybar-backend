@@ -20,6 +20,7 @@ import contactRoutes from './routes/contact';
 import { errorHandler } from './middleware/errorHandler';
 import { authenticate } from './middleware/auth';
 import { setupSocketHandlers } from './socket/socketHandlers';
+import mongoose from 'mongoose';
 
 // Load environment variables
 dotenv.config();
@@ -54,6 +55,22 @@ connectDB().then(() => {
   dbConnected = true;
 }).catch((error) => {
   console.error('❌ Database connection failed:', error);
+  dbConnected = false;
+});
+
+// Add database connection event listeners
+mongoose.connection.on('connected', () => {
+  console.log('✅ MongoDB connection established');
+  dbConnected = true;
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err);
+  dbConnected = false;
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️ MongoDB connection disconnected');
   dbConnected = false;
 });
 
