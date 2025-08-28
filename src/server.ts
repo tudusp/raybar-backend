@@ -257,6 +257,49 @@ app.get('/api/cloudinary-test', (req, res) => {
   });
 });
 
+// Direct MongoDB connection test
+app.get('/api/mongo-test', async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    const mongoURI = process.env.MONGODB_URI;
+    
+    if (!mongoURI) {
+      return res.status(500).json({ 
+        message: 'MONGODB_URI not found',
+        hasUri: false
+      });
+    }
+    
+    // Try to connect directly
+    const conn = await mongoose.createConnection(mongoURI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
+    
+    // Test the connection
+    await conn.db.admin().ping();
+    
+    res.status(200).json({ 
+      message: 'MongoDB connection successful',
+      hasUri: true,
+      connected: true,
+      host: conn.host,
+      name: conn.name
+    });
+    
+    // Close the test connection
+    await conn.close();
+  } catch (error) {
+    console.error('MongoDB test error:', error);
+    res.status(500).json({ 
+      message: 'MongoDB connection failed',
+      hasUri: !!process.env.MONGODB_URI,
+      connected: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // CORS test endpoint
 app.get('/api/cors-test', (req, res) => {
   console.log('CORS test request from:', req.headers.origin);
