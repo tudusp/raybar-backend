@@ -281,7 +281,18 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Socket.IO setup
-setupSocketHandlers(io);
+if (process.env.VERCEL) {
+  console.log('⚠️ Socket.IO disabled on Vercel serverless - using polling fallback');
+  // For Vercel, we'll use polling instead of WebSockets
+  app.get('/api/socket-status', (req, res) => {
+    res.json({ 
+      status: 'polling',
+      message: 'WebSocket not available on serverless, using polling fallback'
+    });
+  });
+} else {
+  setupSocketHandlers(io);
+}
 
 // Error handling middleware
 app.use(errorHandler);

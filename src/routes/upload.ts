@@ -2,25 +2,21 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
 import { AuthRequest } from '../middleware/auth';
 import User from '../models/User';
 
 const router = express.Router();
 
-// Configure multer for image upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Configure multer for memory storage (for Cloudinary)
+const storage = multer.memoryStorage();
 
 const fileFilter = (req: any, file: any, cb: any) => {
   // Accept only image files
@@ -39,6 +35,27 @@ const upload = multer({
   }
 });
 
+// Helper function to upload to Cloudinary
+const uploadToCloudinary = async (file: Express.Multer.File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'matchmaking',
+        resource_type: 'auto',
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result!.secure_url);
+        }
+      }
+    );
+
+    stream.end(file.buffer);
+  });
+};
+
 // Upload profile photo
 router.post('/profile-photo', upload.single('photo'), async (req: AuthRequest, res: express.Response) => {
   try {
@@ -51,28 +68,28 @@ router.post('/profile-photo', upload.single('photo'), async (req: AuthRequest, r
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Create file URL
-    const fileUrl = `/uploads/${req.file.filename}`;
+    // Upload to Cloudinary
+    const cloudinaryUrl = await uploadToCloudinary(req.file);
 
     // Add photo to user's photos array
-    user.profile.photos.push(fileUrl);
+    user.profile.photos.push(cloudinaryUrl);
 
     // If this is the first photo, make it the primary photo
     if (user.profile.photos.length === 1) {
       // Reorder to make the new photo first
-      user.profile.photos = [fileUrl, ...user.profile.photos.filter(p => p !== fileUrl)];
+      user.profile.photos = [cloudinaryUrl, ...user.profile.photos.filter(p => p !== cloudinaryUrl)];
     }
 
     await user.save();
 
     res.json({
       message: 'Photo uploaded successfully!',
-      photoUrl: fileUrl,
+      photoUrl: cloudinaryUrl,
       photos: user.profile.photos
     });
   } catch (error) {
     console.error('Upload photo error:', error);
-    res.status(500).json({ message: 'Server error.' });
+    res.status(500).json({ message: 'Server error during upload.' });
   }
 });
 
@@ -92,8 +109,8 @@ router.post('/photos', upload.array('photos', 6), async (req: AuthRequest, res: 
 
     // Process each uploaded file
     for (const file of req.files as any[]) {
-      const fileUrl = `/uploads/${file.filename}`;
-      uploadedPhotos.push(fileUrl);
+      const cloudinaryUrl = await uploadToCloudinary(file);
+      uploadedPhotos.push(cloudinaryUrl);
     }
 
     // Add new photos to user's photos array

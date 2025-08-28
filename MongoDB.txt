@@ -13,3 +13,5 @@ git commit -m "Fix Vercel config: remove conflicting functions property"
 
 # Push to GitHub
 git push origin main
+
+raybar-backend-m78w-git-main-s-p-tudus-projects.vercel.app
