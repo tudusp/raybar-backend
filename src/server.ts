@@ -273,27 +273,33 @@ app.get('/api/mongo-test', async (req, res) => {
     console.log('🔍 Testing MongoDB connection...');
     console.log('🔍 URI length:', mongoURI.length);
     
-    // Try to connect directly
-    const conn = await mongoose.createConnection(mongoURI, {
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-    });
-    
-    console.log('🔍 Connection created, testing ping...');
-    
-    // Test the connection with a simple ping
-    await conn.db.admin().ping();
-    
-    res.status(200).json({ 
-      message: 'MongoDB connection successful',
-      hasUri: true,
-      connected: true,
-      host: conn.host,
-      name: conn.name
-    });
-    
-    // Close the test connection
-    await conn.close();
+    // Use the main mongoose connection
+    if (mongoose.connection.readyState === 1) {
+      // Already connected
+      res.status(200).json({ 
+        message: 'MongoDB already connected',
+        hasUri: true,
+        connected: true,
+        host: mongoose.connection.host,
+        name: mongoose.connection.name,
+        readyState: mongoose.connection.readyState
+      });
+    } else {
+      // Try to connect
+      await mongoose.connect(mongoURI, {
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+      });
+      
+      res.status(200).json({ 
+        message: 'MongoDB connection successful',
+        hasUri: true,
+        connected: true,
+        host: mongoose.connection.host,
+        name: mongoose.connection.name,
+        readyState: mongoose.connection.readyState
+      });
+    }
   } catch (error) {
     console.error('MongoDB test error:', error);
     res.status(500).json({ 
