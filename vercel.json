@@ -2,22 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/index.ts",
+      "src": "src/server.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.ts"
+      "dest": "/src/server.ts"
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.ts"
+      "dest": "/src/server.ts"
     }
   ],
   "functions": {
-    "api/index.ts": {
+    "src/server.ts": {
       "maxDuration": 30,
       "memory": 1024
     }
