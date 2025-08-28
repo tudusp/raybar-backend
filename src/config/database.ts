@@ -27,7 +27,7 @@ const connectDB = async (): Promise<void> => {
       minPoolSize: 0,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 10000,
-      bufferCommands: false,
+      bufferCommands: true, // Re-enable for serverless
       bufferMaxEntries: 0,
       connectTimeoutMS: 5000,
       retryWrites: true,
