@@ -2,24 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/hello.ts",
+      "src": "src/server.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/hello",
-      "dest": "/api/hello.ts"
+      "src": "/api/(.*)",
+      "dest": "/src/server.ts"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/hello.ts"
+      "src": "/(.*)",
+      "dest": "/src/server.ts"
     }
-  ],
-  "functions": {
-    "api/hello.ts": {
-      "maxDuration": 10,
-      "memory": 512
-    }
-  }
+  ]
 }
