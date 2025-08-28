@@ -20,7 +20,7 @@ const connectDB = async (): Promise<void> => {
     console.log('🔍 MONGODB_URI starts with:', process.env.MONGODB_URI?.substring(0, 20) + '...');
     
     // For serverless, use a cached connection or create new one
-    if (cachedConnection) {
+    if (cachedConnection && mongoose.connection.readyState === 1) {
       console.log('🔗 Using cached MongoDB connection');
       return;
     }
@@ -33,12 +33,12 @@ const connectDB = async (): Promise<void> => {
       },
       maxPoolSize: 1,
       minPoolSize: 0,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 10000,
-      bufferCommands: true,
+      serverSelectionTimeoutMS: 3000, // Very short timeout for serverless
+      socketTimeoutMS: 5000, // Very short timeout for serverless
+      bufferCommands: false, // Disable buffering for serverless
       bufferMaxEntries: 0,
-      connectTimeoutMS: 5000,
-      retryWrites: true,
+      connectTimeoutMS: 3000, // Very short timeout for serverless
+      retryWrites: false, // Disable retry writes for serverless
       w: 'majority' as const,
     };
 
