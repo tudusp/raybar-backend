@@ -31,14 +31,14 @@ const connectDB = async (): Promise<void> => {
         strict: true,
         deprecationErrors: true,
       },
-      maxPoolSize: 1,
-      minPoolSize: 0,
-      serverSelectionTimeoutMS: 3000, // Very short timeout for serverless
-      socketTimeoutMS: 5000, // Very short timeout for serverless
-      bufferCommands: false, // Disable buffering for serverless
+      maxPoolSize: 10, // Higher for Render
+      minPoolSize: 1, // Keep connection alive
+      serverSelectionTimeoutMS: 10000, // Normal timeout for Render
+      socketTimeoutMS: 45000, // Normal timeout for Render
+      bufferCommands: true, // Enable buffering for Render
       bufferMaxEntries: 0,
-      connectTimeoutMS: 3000, // Very short timeout for serverless
-      retryWrites: false, // Disable retry writes for serverless
+      connectTimeoutMS: 10000, // Normal timeout for Render
+      retryWrites: true, // Enable retry writes for Render
       w: 'majority' as const,
     };
 
