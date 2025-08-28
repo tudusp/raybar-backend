@@ -5,10 +5,8 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
-    "build": "npm run clean && tsc",
-    "clean": "rimraf dist",
+    "build": "tsc",
     "start": "node dist/server.js",
-    "postinstall": "npm run build",
     "test": "jest",
     "network": "node start-network.js"
   },
@@ -45,7 +43,6 @@
     "@vercel/node": "^3.0.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.2",
-    "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
