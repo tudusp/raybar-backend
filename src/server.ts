@@ -191,6 +191,34 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Database test endpoint
+app.get('/api/db-test', async (req, res) => {
+  try {
+    if (!dbConnected) {
+      return res.status(500).json({ 
+        message: 'Database not connected',
+        dbConnected: false
+      });
+    }
+    
+    // Test database connection by counting users
+    const userCount = await require('../models/User').countDocuments();
+    
+    res.status(200).json({ 
+      message: 'Database connection working',
+      dbConnected: true,
+      userCount: userCount
+    });
+  } catch (error) {
+    console.error('Database test error:', error);
+    res.status(500).json({ 
+      message: 'Database connection failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      dbConnected: false
+    });
+  }
+});
+
 // CORS test endpoint
 app.get('/api/cors-test', (req, res) => {
   console.log('CORS test request from:', req.headers.origin);
