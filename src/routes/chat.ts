@@ -8,6 +8,39 @@ import { NotificationService } from '../services/notificationService';
 
 const router = express.Router();
 
+// Debug endpoint to check match authorization
+router.get('/debug/match/:matchId', authenticate, async (req: AuthRequest, res: express.Response) => {
+  try {
+    const { matchId } = req.params;
+    
+    console.log('🔍 Debug - User ID:', req.userId);
+    console.log('🔍 Debug - Match ID:', matchId);
+    
+    const match = await Match.findById(matchId);
+    if (!match) {
+      return res.status(404).json({ message: 'Match not found' });
+    }
+    
+    const isUserInMatch = match.user1.toString() === req.userId!.toString() || match.user2.toString() === req.userId!.toString();
+    
+    return res.status(200).json({
+      match: {
+        id: match._id,
+        user1: match.user1,
+        user2: match.user2,
+        isActive: match.isActive
+      },
+      currentUser: req.userId,
+      isUserInMatch: isUserInMatch,
+      user1Match: match.user1.toString() === req.userId!.toString(),
+      user2Match: match.user2.toString() === req.userId!.toString()
+    });
+  } catch (error) {
+    console.error('Debug error:', error);
+    res.status(500).json({ message: 'Debug error' });
+  }
+});
+
 // @route   GET /api/chat/matches/:matchId/messages
 // @desc    Get messages for a match
 // @access  Private
