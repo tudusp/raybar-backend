@@ -11,10 +11,10 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   res.status(200).json({
-    message: 'Hello from Vercel!',
+    message: 'Hello from Vercel! - Updated',
     timestamp: new Date().toISOString(),
     method: req.method,
     url: req.url,
-    version: 'test-1.0'
+    version: 'test-1.1'
   });
 }
