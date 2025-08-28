@@ -48,3 +48,5 @@ Make sure these are set in your Vercel dashboard under Settings > Environment Va
 - Check Vercel Function Logs
 - Monitor MongoDB Atlas metrics
 - Set up error tracking if needed
+
+<!-- redeploy 2025-08-28T18:50:33.9795129+05:30 -->
