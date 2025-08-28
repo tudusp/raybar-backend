@@ -86,34 +86,7 @@ if (mongoose.connection.readyState === 1) {
 
 // CORS middleware - apply first
 app.use(cors({
-  origin: function (origin, callback) {
-    console.log('CORS request from origin:', origin);
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow localhost for development
-    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      return callback(null, true);
-    }
-    
-    // Allow your Vercel frontend domains
-    if (origin.includes('raybar.vercel.app') || 
-        origin.includes('raybar-budi.vercel.app') ||
-        origin.includes('raybar-git-main-s-p-tudus-projects.vercel.app') ||
-        origin.includes('vercel.app') || 
-        origin.includes('netlify.app')) {
-      return callback(null, true);
-    }
-    
-    // Allow all origins in development and for Vercel
-    if (process.env.NODE_ENV !== 'production' || process.env.VERCEL) {
-      return callback(null, true);
-    }
-    
-    // In production, you can restrict to specific domains
-    callback(null, true);
-  },
+  origin: true, // Allow all origins for now
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
@@ -121,6 +94,9 @@ app.use(cors({
   optionsSuccessStatus: 200,
   preflightContinue: false
 }));
+
+// Additional CORS handling for preflight requests
+app.options('*', cors());
 
 // Rate limiting - more generous for chat applications
 const generalLimiter = rateLimit({
@@ -164,18 +140,6 @@ app.use(helmet({
 }));
 app.use(devLimiter); // Use development rate limiter for general requests
 
-// Additional CORS handling for preflight requests
-app.options('*', (req, res) => {
-  console.log('CORS preflight request from:', req.headers.origin);
-  console.log('CORS preflight method:', req.method);
-  console.log('CORS preflight headers:', req.headers);
-  
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
-});
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
