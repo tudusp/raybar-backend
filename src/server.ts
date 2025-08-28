@@ -54,13 +54,20 @@ console.log('🔍 Starting database connection...');
 console.log('🔍 MONGODB_URI exists:', !!process.env.MONGODB_URI);
 console.log('🔍 VERCEL environment:', !!process.env.VERCEL);
 
-connectDB().then(() => {
-  console.log('✅ Database connected successfully');
-  dbConnected = true;
-}).catch((error) => {
-  console.error('❌ Database connection failed:', error);
-  dbConnected = false;
-});
+// Initialize database connection
+const initializeDB = async () => {
+  try {
+    await connectDB();
+    console.log('✅ Database connected successfully');
+    dbConnected = true;
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    dbConnected = false;
+  }
+};
+
+// Initialize database immediately
+initializeDB();
 
 // Add database connection event listeners
 mongoose.connection.on('connected', () => {
