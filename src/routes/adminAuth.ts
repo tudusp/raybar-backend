@@ -11,6 +11,10 @@ router.post('/login', [
   body('password').isLength({ min: 6 })
 ], async (req: express.Request, res: express.Response) => {
   try {
+    console.log('🔍 Admin login attempt:', { email: req.body.email });
+    console.log('🔍 JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    console.log('🔍 JWT_SECRET length:', process.env.JWT_SECRET?.length);
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -61,7 +65,11 @@ router.post('/login', [
     });
   } catch (error) {
     console.error('Admin login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ 
+      message: 'Server error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
   }
 });
 
