@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import { createDefaultAdmin } from './createDefaultAdmin';
 
+let cachedConnection: typeof mongoose | null = null;
+
 const connectDB = async (): Promise<void> => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/matchmaking';
@@ -17,6 +19,12 @@ const connectDB = async (): Promise<void> => {
     console.log('🔍 MONGODB_URI length:', process.env.MONGODB_URI?.length);
     console.log('🔍 MONGODB_URI starts with:', process.env.MONGODB_URI?.substring(0, 20) + '...');
     
+    // For serverless, use a cached connection or create new one
+    if (cachedConnection) {
+      console.log('🔗 Using cached MongoDB connection');
+      return;
+    }
+    
     const options = {
       serverApi: {
         version: '1' as const,
@@ -27,7 +35,7 @@ const connectDB = async (): Promise<void> => {
       minPoolSize: 0,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 10000,
-      bufferCommands: true, // Re-enable for serverless
+      bufferCommands: true,
       bufferMaxEntries: 0,
       connectTimeoutMS: 5000,
       retryWrites: true,
@@ -40,6 +48,9 @@ const connectDB = async (): Promise<void> => {
     console.log(`🍃 MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database: ${conn.connection.name}`);
     console.log(`🌐 Connection Type: ${process.env.MONGODB_URI ? 'Atlas Cloud' : 'Local'}`);
+
+    // Cache the connection for serverless
+    cachedConnection = mongoose;
 
     // Create default admin after successful connection
     await createDefaultAdmin();
