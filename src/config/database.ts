@@ -14,20 +14,31 @@ const connectDB = async (): Promise<void> => {
       throw new Error('MONGODB_URI not found in environment variables');
     }
     
+    console.log('🔍 MONGODB_URI length:', process.env.MONGODB_URI?.length);
+    console.log('🔍 MONGODB_URI starts with:', process.env.MONGODB_URI?.substring(0, 20) + '...');
+    
     const options = {
       serverApi: {
         version: '1' as const,
         strict: true,
         deprecationErrors: true,
       },
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 10000,
+      maxPoolSize: 5, // Reduced for serverless
+      serverSelectionTimeoutMS: 30000, // Increased timeout
       socketTimeoutMS: 45000,
       bufferCommands: true, // Enable buffer commands for serverless
-      connectTimeoutMS: 10000,
+      connectTimeoutMS: 30000, // Increased timeout
+      retryWrites: true,
+      w: 'majority' as const,
+      // Add these for better serverless compatibility
+      keepAlive: true,
+      keepAliveInitialDelay: 300000,
+      autoReconnect: true,
+      reconnectTries: Number.MAX_VALUE,
+      reconnectInterval: 1000,
     };
 
-    console.log('🔗 Connecting to MongoDB...');
+    console.log('🔗 Connecting to MongoDB with options:', JSON.stringify(options, null, 2));
     const conn = await mongoose.connect(mongoURI, options);
 
     console.log(`🍃 MongoDB Connected: ${conn.connection.host}`);
