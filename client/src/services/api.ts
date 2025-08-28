@@ -5,8 +5,8 @@ const API_CONFIG = {
   // Your Vercel backend URL (updated to the working deployment)
   VERCEL_URL: 'https://raybar-backend.vercel.app/api',
   LOCAL_URL: 'http://localhost:5000/api',
-  // Automatically use Vercel in production, local in development
-  USE_VERCEL: process.env.NODE_ENV === 'production'
+  // Always use Vercel backend when deployed on Vercel
+  USE_VERCEL: process.env.NODE_ENV === 'production' || window.location.hostname.includes('vercel.app')
 };
 
 // Get the base URL dynamically
