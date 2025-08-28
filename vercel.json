@@ -14,10 +14,6 @@
     {
       "src": "/api/(.*)",
       "dest": "/api/hello.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/hello.ts"
     }
   ],
   "functions": {
