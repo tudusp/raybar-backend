@@ -195,6 +195,19 @@ app.get('/api/cors-test', (req, res) => {
   res.status(200).json({ message: 'CORS is working!', origin: req.headers.origin });
 });
 
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  console.log('Test endpoint request from:', req.headers.origin);
+  res.status(200).json({ 
+    message: 'API is working!',
+    method: req.method,
+    url: req.url,
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    vercel: !!process.env.VERCEL
+  });
+});
+
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
   const frontendPath = path.join(__dirname, '../client/dist');
