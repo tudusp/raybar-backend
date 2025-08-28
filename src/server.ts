@@ -185,7 +185,9 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
     vercel: !!process.env.VERCEL,
-    database: dbConnected ? 'connected' : 'disconnected'
+    database: dbConnected ? 'connected' : 'disconnected',
+    version: '3.0.0',
+    buildTime: new Date().toISOString()
   });
 });
 
@@ -204,7 +206,17 @@ app.get('/api/test', (req, res) => {
     url: req.url,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    vercel: !!process.env.VERCEL
+    vercel: !!process.env.VERCEL,
+    version: '3.0.0'
+  });
+});
+
+// Simple debug endpoint
+app.get('/api/debug', (req, res) => {
+  res.status(200).json({ 
+    message: 'Debug endpoint working!',
+    timestamp: new Date().toISOString(),
+    version: '3.0.0'
   });
 });
 
