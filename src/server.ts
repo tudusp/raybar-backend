@@ -281,16 +281,15 @@ app.get('/api/mongo-test', async (req, res) => {
     
     console.log('🔍 Connection created, testing ping...');
     
-    // Test the connection with a simple operation
-    const result = await conn.db.listCollections().toArray();
+    // Test the connection with a simple ping
+    await conn.db.admin().ping();
     
     res.status(200).json({ 
       message: 'MongoDB connection successful',
       hasUri: true,
       connected: true,
       host: conn.host,
-      name: conn.name,
-      collections: result.length
+      name: conn.name
     });
     
     // Close the test connection
