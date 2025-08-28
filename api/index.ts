@@ -1,4 +1,3 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -25,7 +24,8 @@ app.get('/api/health', (req, res) => {
     message: 'Server is running!', 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    vercel: !!process.env.VERCEL
+    vercel: !!process.env.VERCEL,
+    version: '2.0'
   });
 });
 
@@ -59,7 +59,7 @@ app.get('/api/debug', (req, res) => {
 });
 
 // Vercel serverless function handler
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req: any, res: any) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
